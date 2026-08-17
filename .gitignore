@@ -1,0 +1,25 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+*.egg-info/
+/dist/
+/build/
+.coverage
+htmlcov/
+.DS_Store
+
+# Local Ledger instances (object store + metadata shards).
+/data/
+/demo/.state/
+
+# Personal permission allowlist. `.claude/settings.json` is the shared one.
+/.claude/settings.local.json
+
+# Gated milestone: Rust build output. The lock file is *kept* — the crate
+# pins jj-lib exactly, and a reproducible build of a pinned dependency is
+# the whole point of the pin.
+/jj-backend/target/

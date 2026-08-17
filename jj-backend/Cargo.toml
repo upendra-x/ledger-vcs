@@ -1,0 +1,34 @@
+[package]
+name = "ledger-jj-backend"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.89"
+description = "A jj_lib::backend::Backend implementation backed by Ledger"
+license = "Apache-2.0"
+publish = false
+
+[dependencies]
+# Pinned exactly. jj-lib's Backend trait is not a stable API — it gained async
+# methods and copy tracking within the 0.4x series alone — so an unpinned
+# dependency would break this crate on somebody else's schedule.
+#
+# `default-features = false` drops the `git` feature and with it `gix`. Ledger
+# is the storage; a git backend compiled in alongside it would be several
+# hundred crates carried for nothing.
+jj-lib = { version = "=0.44.0", default-features = false }
+
+async-trait = "0.1"
+futures = "0.3"
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "macros", "io-util"] }
+thiserror = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Blocking HTTP, deliberately. `ureq` is a few crates and speaks plain HTTP to
+# 127.0.0.1; an async client would pull in a TLS stack and a connection pool to
+# talk to a process on the same machine. The blocking calls are moved off the
+# async executor with `spawn_blocking`, which is what that API is for.
+ureq = { version = "3", default-features = false }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["rt", "macros"] }

@@ -1,0 +1,102 @@
+[project]
+name = "ledger"
+version = "0.1.0"
+description = "Ledger — a version control system for RL environments"
+authors = [{ name = "Upendra Kumar" }]
+readme = "README.md"
+requires-python = ">=3.14"
+
+dependencies = [
+    # The hash function IS the object namespace. This is a hard
+    # dependency on purpose: a silent fallback to another hash would rename every
+    # object in the corpus. See src/format/constants.py.
+    "blake3>=1.0.9",
+    "fastapi>=0.141",
+    "uvicorn[standard]>=0.52",
+    "pydantic>=2.13",
+    "typer>=0.27",
+    "rich>=15.0",
+    "cryptography>=50.0",
+    # Read by build/manifest.py and by nothing else. The layering test enforces it.
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+ledger = "src.cli.__main__:main"
+ledgerd = "src.api.__main__:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0",
+    # Only `fastapi.testclient` imports this. `src/` has no import site:
+    # the CLI opens a Ledger in-process rather than speaking HTTP to one.
+    "httpx>=0.28",
+    "pytest-cov>=7.0",
+    "hypothesis>=6.140",
+    "mypy>=1.18",
+    "ruff>=0.14",
+    # The manifest parser is the one module that touches YAML, and it is the one
+    # module that interprets bytes a caller uploaded — so it is exactly where
+    # type checking earns its keep.
+    "types-PyYAML>=6.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+markers = [
+    "slow: excluded from the default run; benchmarks and multi-GB proofs",
+]
+
+[tool.ruff]
+line-length = 100
+src = [".", "tests"]
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4", "PT", "RET", "SIM", "TCH", "RUF"]
+ignore = [
+    # The docstrings are prose; the arrows, multiplication signs and
+    # box-drawing characters in them are deliberate.
+    "RUF001",
+    "RUF002",
+    "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# The error hierarchy is named after the HTTP semantics it maps onto, because
+# `raise Conflict(...)` at a call site says exactly what the caller will see.
+# `ConflictError` would read worse everywhere it is used, and the base class
+# already carries the `Error` suffix.
+"src/errors.py" = ["N818"]
+# `constants as C` is a deliberate alias: this module is referenced dozens of
+# times per file and `C.MIN_CHUNK_BYTES` keeps those lines readable.
+"src/cli/commands/fmt.py" = ["N812"]
+# typer and FastAPI both resolve parameter annotations at runtime — typer to
+# build the argument parser, FastAPI to build the dependency graph and the
+# OpenAPI schema. Their types must be real imports, not type-checking-only ones.
+"src/cli/**" = ["TC001", "TC002", "TC003"]
+"src/api/**" = ["TC001", "TC002", "TC003"]
+# Test fixtures are annotated with types pytest resolves at runtime, and
+# moving them into a type-checking block breaks fixture injection.
+"tests/**" = ["N812", "TC001", "TC002", "TC003"]
+# The demo is a script: it is read top to bottom by someone deciding whether
+# to trust the system, and a type-checking block is noise in that reading.
+"demo/**" = ["TC001", "TC002", "TC003", "E402"]
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+# `demo` is checked too. The portal is two thousand lines of code that talks to
+# every service in `src/`, and leaving it out would mean the one part of the
+# repository a reviewer runs first is the one part nothing checks.
+files = ["src", "tests", "demo"]
+warn_unreachable = true
+disallow_any_explicit = false

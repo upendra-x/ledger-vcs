@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ledger — console</title>
+<link rel="stylesheet" href="/console/assets/console.css">
+</head>
+<body>
+
+<header class="bar">
+  <div class="brand">
+    <span class="mark">▚</span>
+    <span class="wordmark">LEDGER</span>
+    <span class="tagline">version control for RL environments</span>
+  </div>
+
+  <div class="bar-right">
+    <div class="score" title="The twelve requirements, demonstrated live on this page">
+      <span id="score-value">0</span><span class="score-of">/12</span>
+    </div>
+    <button id="run-core" class="primary">Run the essentials</button>
+    <button id="run-all">Reset &amp; run all</button>
+    <button id="reset">Reset</button>
+  </div>
+</header>
+
+<div id="banner" class="banner" hidden></div>
+
+<main>
+  <section id="requirements" class="requirements">
+    <div class="section-head">
+      <h2>Requirements</h2>
+    </div>
+    <div id="cards" class="cards"></div>
+  </section>
+
+  <aside class="live">
+    <section class="panel">
+      <div class="panel-head">
+        <h3>Cost per version</h3>
+      </div>
+      <div id="chart-cost" class="chart-body"><p class="empty">run a step that writes</p></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h3>Objects by name</h3>
+      </div>
+      <div id="chart-names" class="chart-body"><p class="empty">commit something first</p></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h3>Storage</h3>
+      </div>
+      <div id="chart-storage" class="chart-body"><p class="empty">no corpus yet</p></div>
+    </section>
+  </aside>
+</main>
+
+<script src="/console/assets/console.js"></script>
+</body>
+</html>
